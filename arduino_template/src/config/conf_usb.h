@@ -67,7 +67,7 @@
 	(USB_CONFIG_ATTR_SELF_POWERED)
 // (USB_CONFIG_ATTR_BUS_POWERED)
 // (USB_CONFIG_ATTR_REMOTE_WAKEUP|USB_CONFIG_ATTR_SELF_POWERED)
-// (USB_CONFIG_ATTR_REMOTE_WAKEUP|USB_CONFIG_ATTR_BUS_POWERED)
+// (USB_CONFIG_ATTR_REMOTE_WAKEUP|USB_CONFIG_ATTR_BUS_POWERED)	
 
 //! USB Device string definitions (Optional)
 // #define  USB_DEVICE_MANUFACTURE_NAME      "Manufacture name"
@@ -130,9 +130,8 @@
 #define  UDI_CDC_RX_NOTIFY(port)			usb_serial_rx_notify(port)
 #define  UDI_CDC_TX_EMPTY_NOTIFY(port)		usb_serial_tx_empty_notify(port);
 #define  UDI_CDC_SET_CODING_EXT(port,cfg)
-#define UDI_CDC_SET_DTR_EXT(port,set)		usb_dtr_changed(port, set)
-extern void usb_dtr_changed(uint8_t, uint8_t);
-#define  UDI_CDC_SET_RTS_EXT(port,set)
+
+#define  UDI_CDC_SET_RTS_EXT(port,set) true
 
 // #define UDI_CDC_ENABLE_EXT(port) my_callback_cdc_enable()
 // extern bool my_callback_cdc_enable(void);
@@ -148,6 +147,9 @@ extern void usb_dtr_changed(uint8_t, uint8_t);
 // extern void my_callback_cdc_set_dtr(uint8_t port, bool b_enable);
 // #define  UDI_CDC_SET_RTS_EXT(port,set) my_callback_cdc_set_rts(port,set)
 // extern void my_callback_cdc_set_rts(uint8_t port, bool b_enable);
+
+#define UDI_CDC_SET_DTR_EXT(port,set)		usb_dtr_changed(port, set)
+extern void usb_dtr_changed(uint8_t, uint8_t);
 
 //! Define it when the transfer CDC Device to Host is a low rate (<512000 bauds)
 //! to reduce CDC buffers size

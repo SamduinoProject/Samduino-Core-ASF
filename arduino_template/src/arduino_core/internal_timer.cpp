@@ -92,20 +92,10 @@ void start_microseconds_counter()
 void delay(uint32_t ms_delay)
 {
 	//get current counter value
-	uint32_t current_value = ms_counter;
-	uint32_t wait_till_value = 0;
+	uint64_t current_value = ms_counter;
+	uint64_t wait_till_value = 0;
 
-	//to wait accordingly, we need to figure out if we will encounter overflow
-	//in the timer during this delay.  So we check for this condition first
-	if(UINT32_MAX - ms_delay < current_value)
-	{
-		//this means overflow will happen in our counter
-		wait_till_value = current_value - (UINT32_MAX - ms_delay);
-	}
-	else
-	{
-		wait_till_value = current_value + ms_delay;
-	}
+	wait_till_value = current_value + ms_delay;
 	
 	//wait till the value is hit as a "delay"
 	while(ms_counter != wait_till_value);
@@ -115,31 +105,21 @@ void delay(uint32_t ms_delay)
 void delayMicroseconds(unsigned int us)
 {
 	//get current counter value
-	uint32_t current_value = micros();
-	uint32_t wait_till_value = 0;
+	uint64_t current_value = micros();
+	uint64_t wait_till_value = 0;
 
-	//to wait accordingly, we need to figure out if we will encounter overflow
-	//in the timer during this delay.  So we check for this condition first
-	if(UINT32_MAX - us < current_value)
-	{
-		//this means overflow will happen in our counter
-		wait_till_value = current_value - (UINT32_MAX - us);
-	}
-	else
-	{
-		wait_till_value = current_value + us;
-	}
+	wait_till_value = current_value + us;
 	
 	//wait till the value is hit as a "delay"
 	while(micros() < wait_till_value);
 }
 
-unsigned long millis(void)
+uint64_t millis(void)
 {
 	return ms_counter;
 }
 
-unsigned long micros()
+uint64_t micros()
 {
 	//first get the microseconds counter ticks register value
 	unsigned long microSeconds = (tc_read_rc(INTERNAL_TIMER, INTERNAL_TIMER_CHANNEL)/60);

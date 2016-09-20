@@ -81,4 +81,8 @@ extern FlashMemory Flash;
 #include "SDCard.h"
 extern SDCardModule SDCard;
 
+//create the real time clock module
+#include "RealTimeClock.h"
+extern RealTimeClock RealTime;
+
 #endif /* PERIPHERALS_H_ */

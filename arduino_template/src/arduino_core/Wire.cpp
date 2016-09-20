@@ -30,24 +30,6 @@ extern "C" {
 
 volatile uint32_t lastStatus = 0;
 
-/*
-void TWI0_Handler()
-{
-	volatile uint32_t status = twi_get_interrupt_status(TWI0) & twi_get_interrupt_mask(TWI0);
-	if(status & TWI_IER_ENDRX)
-	{
-		//Serial.println("End RX");
-		lastStatus = status;
-	}
-	
-	if(status & TWI_IER_ENDTX)
-	{
-		//Serial.println("END TX");
-		lastStatus = status;
-	}
-}
-*/
-
 TwoWire::TwoWire(Twi* twiPtr)
 {
 	//set the peripheral pointer
@@ -55,20 +37,16 @@ TwoWire::TwoWire(Twi* twiPtr)
 }
 
 void TwoWire::begin(void)
-{
-	rxBufferIndex = 0;
-	rxBufferLength = 0;
-
-	txBufferIndex = 0;
-	txBufferLength = 0;
-		
+{		
+	//IRQn twiIrqn = TWI0_IRQn;
 	if(twiPeripheral == TWI0)
 	{
 		//enable clock to the peripheral
 		sysclk_enable_peripheral_clock(ID_TWI0);
 		//set gpio pins to TWI control which is peripheral A Mux setting
-		pio_configure(PIOA, PIO_PERIPH_A, PIO_PA4A_TWCK0, PIO_PULLUP);
-		pio_configure(PIOA, PIO_PERIPH_A, PIO_PA3A_TWD0, PIO_PULLUP);
+		pio_configure(PIOA, PIO_PERIPH_A, PIO_PA4A_TWCK0, PIO_DEFAULT);
+		pio_configure(PIOA, PIO_PERIPH_A, PIO_PA3A_TWD0, PIO_DEFAULT);
+		//twiIrqn = TWI0_IRQn;
 	}
 	else if(twiPeripheral == TWI1)
 	{
@@ -77,6 +55,7 @@ void TwoWire::begin(void)
 		//set gpio pins to TWI control which is peripheral A Mux setting
 		pio_configure(PIOB, PIO_PERIPH_A, PIO_PB5_IDX, PIO_DEFAULT);
 		pio_configure(PIOB, PIO_PERIPH_A, PIO_PB4_IDX, PIO_DEFAULT);
+		//twiIrqn = TWI1_IRQn;
 	}
 	
 	twi_reset(twiPeripheral);
@@ -86,9 +65,20 @@ void TwoWire::begin(void)
 	defaultOptions.master_clk = sysclk_get_peripheral_hz();
 	defaultOptions.speed = 50000; //100khz standard default speed
 	twi_master_setup(twiPeripheral, &defaultOptions);
+	
+	//setup the buffers
+	rx_buffer_size = 0;
+	rx_buffer_head = rx_buffer;
+	rx_buffer_tail = rx_buffer;
+	rx_buffer_end = &rx_buffer[TWI_BUFFER_SIZE-1];
 
-	//twi_enable_interrupt(twiPeripheral, (TWI_IER_ENDRX | TWI_IER_ENDTX));
-	//NVIC_EnableIRQ(TWI0_IRQn);
+	tx_buffer_size = 0;
+	tx_buffer_head = tx_buffer;
+	tx_buffer_tail = tx_buffer;
+	tx_buffer_end = &tx_buffer[TWI_BUFFER_SIZE-1];
+	
+	//twi_enable_interrupt(twiPeripheral, (TWI_IER_RXRDY | TWI_IER_ENDTX));// | TWI_IER_ENDTX));
+	//NVIC_EnableIRQ(twiIrqn);
 	//twi_enable_master_mode(twiPeripheral);
 	//twi_master_init(twiPeripheral, &defaultOptions);
 }
@@ -129,59 +119,32 @@ void TwoWire::setClock(uint32_t clock)
 	twi_set_speed(twiPeripheral, clock, sysclk_get_main_hz());
 }
 
+//this is a read
 uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity, uint32_t iaddress, uint8_t isize, uint8_t sendStop)
-{
-	/*  BELOW ALL BUILT INTO ASF STUFF
-	if (isize > 0) {
-		// send internal address; this mode allows sending a repeated start to access
-		// some devices' internal registers. This function is executed by the hardware
-		// TWI module on other processors (for example Due's TWI_IADR and TWI_MMR registers)
-
-		beginTransmission(address);
-
-		// the maximum size of internal address is 3 bytes
-		if (isize > 3){
-			isize = 3;
-		}
-
-		// write internal register address - most significant byte first
-		while (isize-- > 0)
-		write((uint8_t)(iaddress >> (isize*8)));
-		endTransmission(false);
-	}
-	*/
-
-	// clamp to buffer length
-	if(quantity > BUFFER_LENGTH){
-		quantity = BUFFER_LENGTH;
-	}
-	// perform blocking read into buffer
-	//uint8_t read = twi_readFrom(address, rxBuffer, quantity, sendStop);
+{	
 	twi_packet_t packet;
+	uint8_t tempBuffer[256];
 	packet.chip = address;
-	packet.buffer = rxBuffer;
-	packet.addr_length = isize;
-	for(int i = 0; i < isize; i++)
-	{
-		packet.addr[i] = (iaddress >> (i*8)) & 0xff;
-	}
-	packet.length = quantity;  //? on this not sure if right
 	
+	for(uint8_t i = 0; i < isize; i++)
+	{
+		packet.addr[i] = (iaddress >> (i*8));
+	}
+	packet.addr_length = isize;
+	packet.length = quantity;
+	packet.buffer = tempBuffer;
 	if(twi_master_read(twiPeripheral, &packet) == TWI_SUCCESS)
 	{
-		rxBufferIndex = quantity;
+		for(uint8_t i = 0; i < quantity; i++)
+		{
+			rx_buffer_append(tempBuffer[i]);
+		}
+		return 0;
 	}
 	else
 	{
-		rxBufferIndex = 0;
+		return -1;
 	}
-	
-	return rxBufferIndex;
-	// set rx buffer iterator vars
-	//rxBufferIndex = 0;
-	//rxBufferLength = read;
-
-	//return read;
 }
 
 uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity, uint8_t sendStop) {
@@ -205,13 +168,7 @@ uint8_t TwoWire::requestFrom(int address, int quantity, int sendStop)
 
 void TwoWire::beginTransmission(uint8_t address)
 {
-	// indicate that we are transmitting
-	transmitting = 1;
-	// set address of targeted slave
 	txAddress = address;
-	// reset tx buffer iterator vars
-	txBufferIndex = 0;
-	txBufferLength = 0;
 }
 
 void TwoWire::beginTransmission(int address)
@@ -234,23 +191,59 @@ void TwoWire::beginTransmission(int address)
 //
 uint8_t TwoWire::endTransmission(uint8_t sendStop)
 {
-	// transmit buffer (blocking)
-	//uint8_t ret = twi_writeTo(txAddress, txBuffer, txBufferLength, 1, sendStop);
+	volatile uint32_t writeRes = 0;
+	/*
+	uint8_t stopSent = 0;
+	//this actually starts the tx and sends all queued bytes
+	if(tx_buffer_size < 2 && sendStop)
+	{
+		twiPeripheral->TWI_CR = TWI_CR_START | TWI_CR_STOP;
+		stopSent = 1;
+	}
+	else
+	{
+		twiPeripheral->TWI_CR = TWI_CR_START;
+	}
+	while(tx_buffer_size > 0)
+	{
+		//send data
+		uint8_t sendByte;
+		tx_buffer_remove(&sendByte);
+		twi_write_byte(twiPeripheral, sendByte);
+		while(twiPeripheral->TWI_SR & TWI_SR_TXCOMP == 0); //wait for tx to complete
+	}
+	if(sendStop && !stopSent)
+	{
+		twiPeripheral->TWI_CR = TWI_CR_STOP;
+		while (!(twiPeripheral->TWI_SR & TWI_SR_TXCOMP));
+	}
+	*/
 	
-	twi_packet_t packet;
-	packet.chip = txAddress;
-	packet.buffer = txBuffer;
-	packet.addr_length = 0;
-	packet.length = txBufferLength;
+	if(tx_buffer_size > 0)
+	{
+		twi_packet_t packet;
+		uint8_t sendBuffer[32];
+		packet.chip = txAddress;
+		packet.addr_length = 0;
+		packet.length = tx_buffer_size;
+		packet.buffer = sendBuffer;
+		for(uint8_t i = 0; i < packet.length; i++)
+		{
+			tx_buffer_remove(&sendBuffer[i]);
+		}
+		//if(twi_master_write(twiPeripheral, &packet) != TWI_SUCCESS)
+		writeRes = twi_master_write(twiPeripheral, &packet);
+		if(writeRes == TWI_SUCCESS)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
 	
-	uint8_t ret = twi_master_write(twiPeripheral, &packet);
-	
-	// reset tx buffer iterator vars
-	txBufferIndex = 0;
-	txBufferLength = 0;
-	// indicate that we are done transmitting
-	transmitting = 0;
-	return ret;
+	return 0;
 }
 
 //	This provides backwards compatibility with the original
@@ -266,26 +259,18 @@ uint8_t TwoWire::endTransmission(void)
 // or after beginTransmission(address)
 size_t TwoWire::write(uint8_t data)
 {
-	if(transmitting){
-		// in master transmitter mode
-		// don't bother if buffer is full
-		if(txBufferLength >= BUFFER_LENGTH)
-		{
-			setWriteError();
-			return 0;
-		}
-		// put byte in tx buffer
-		txBuffer[txBufferIndex] = data;
-		++txBufferIndex;
-		// update amount in buffer
-		txBufferLength = txBufferIndex;
-	}
-	else
-	{
-		// in slave send mode
-		// reply to master
-		//twi_transmit(&data, 1);
-	}
+	tx_buffer_append(data); //add data to tx buffer
+
+	//if(tx_buffer_size == 0 && twiPeripheral->TWI_SR & TWI_SR_TXRDY)
+	//{
+	//	twi_write_byte(twiPeripheral, data);
+	//}
+	//else
+	//{
+	//	while(tx_buffer_size == TWI_BUFFER_SIZE);  //wait for room to append
+		
+	//	twi_enable_interrupt(twiPeripheral, TWI_IER_ENDTX);  //enable tx complete interrupt
+	//}
 	return 1;
 }
 
@@ -294,15 +279,9 @@ size_t TwoWire::write(uint8_t data)
 // or after beginTransmission(address)
 size_t TwoWire::write(const uint8_t *data, size_t quantity)
 {
-	if(transmitting){
-		// in master transmitter mode
-		for(size_t i = 0; i < quantity; ++i){
-			write(data[i]);
-		}
-		}else{
-		// in slave send mode
-		// reply to master
-		//twi_transmit(data, quantity); TODO: support slave
+	for(unsigned int i = 0; i < quantity; i++)
+	{
+		write(data[i]);
 	}
 	return quantity;
 }
@@ -312,7 +291,7 @@ size_t TwoWire::write(const uint8_t *data, size_t quantity)
 // or after requestFrom(address, numBytes)
 int TwoWire::available(void)
 {
-	return rxBufferLength - rxBufferIndex;
+	return rx_buffer_size;
 }
 
 // must be called in:
@@ -320,15 +299,16 @@ int TwoWire::available(void)
 // or after requestFrom(address, numBytes)
 int TwoWire::read(void)
 {
-	int value = -1;
-	
-	// get each successive byte on each call
-	if(rxBufferIndex < rxBufferLength){
-		value = rxBuffer[rxBufferIndex];
-		++rxBufferIndex;
+	uint8_t data;
+	uint8_t status = rx_buffer_remove(&data);
+	if(status <= 0)
+	{
+		return -1;
 	}
-
-	return value;
+	else
+	{
+		return data;
+	}
 }
 
 // must be called in:
@@ -336,13 +316,14 @@ int TwoWire::read(void)
 // or after requestFrom(address, numBytes)
 int TwoWire::peek(void)
 {
-	int value = -1;
-	
-	if(rxBufferIndex < rxBufferLength){
-		value = rxBuffer[rxBufferIndex];
+	if (rx_buffer_size == 0)
+	{
+		return -1;
 	}
-
-	return value;
+	else
+	{
+		return (*rx_buffer_head);
+	}
 }
 
 void TwoWire::flush(void)
@@ -402,8 +383,143 @@ void TwoWire::onRequest( void (*function)(void) )
 	user_onRequest = function;
 }
 
-// Preinstantiate Objects //////////////////////////////////////////////////////
+uint8_t TwoWire::rx_buffer_append(uint8_t data)
+{
+	if(rx_buffer_size < SERIAL_USART_RX_BUFFER_SIZE)
+	{
+		*rx_buffer_tail = data;
+		
+		if(rx_buffer_tail == rx_buffer_end)
+		{
+			rx_buffer_tail = rx_buffer;
+		}
+		else
+		{
+			rx_buffer_tail++;
+		}
+		cpu_irq_disable();
+		rx_buffer_size++;
+		cpu_irq_enable();
+		return 1;
+	}
+	else
+	{
+		//else no room
+		return 0;
+	}
+}
+uint8_t TwoWire::rx_buffer_remove(uint8_t* data)
+{
+	if(rx_buffer_size > 0)
+	{
+		*data = *rx_buffer_head;
+		
+		if(rx_buffer_head == rx_buffer_end)
+		{
+			rx_buffer_head = rx_buffer;
+		}
+		else
+		{
+			rx_buffer_head++;
+		}
+		cpu_irq_disable();
+		rx_buffer_size--;
+		cpu_irq_enable();
+		return 1;
+	}
+	else
+	{
+		//nothing to remove
+		return 0;
+	}
+}
+
+uint8_t TwoWire::tx_buffer_append(uint8_t data)
+{
+	if(tx_buffer_size < SERIAL_USART_RX_BUFFER_SIZE)
+	{
+		*tx_buffer_tail = data;
+		if(tx_buffer_tail == tx_buffer_end)
+		{
+			tx_buffer_tail = tx_buffer;
+		}
+		else
+		{
+			tx_buffer_tail++;
+		}
+		cpu_irq_disable();
+		tx_buffer_size++;
+		cpu_irq_enable();
+		return 1;
+	}
+	else
+	{
+		//else no room
+		return 0;
+	}
+}
+uint8_t TwoWire::tx_buffer_remove(uint8_t* data)
+{
+	if(tx_buffer_size > 0)
+	{
+		*data = *tx_buffer_head;
+		
+		if(tx_buffer_head == tx_buffer_end)
+		{
+			tx_buffer_head = tx_buffer;
+		}
+		else
+		{
+			tx_buffer_head++;
+		}
+		cpu_irq_disable();
+		tx_buffer_size--;
+		cpu_irq_enable();
+		return 1;
+	}
+	else
+	{
+		//nothing to remove
+		return 0;
+	}
+}
+
+void TwoWire::tx_ready_callback(void)
+{
+	if(tx_buffer_size == 0)
+	{
+		twi_disable_interrupt(twiPeripheral, TWI_IER_ENDTX);
+		return;
+	}
+	else
+	{
+		uint8_t data;
+		tx_buffer_remove(&data);
+		twi_write_byte(twiPeripheral, data);
+	}
+}
+
+void TwoWire::rx_ready_callback(void)
+{
+	uint8_t data = twi_read_byte(twiPeripheral);
+	rx_buffer_append(data);
+}
 
 TwoWire Wire = TwoWire(TWI0);
 TwoWire Wire2 = TwoWire(TWI1);
+
+//Interrupt handlers for the TWI modules
+void TWI0_Handler()
+{
+	volatile uint32_t status = twi_get_interrupt_status(TWI0) & twi_get_interrupt_mask(TWI0);
+	if(status & TWI_IER_RXRDY)
+	{
+		Wire.rx_ready_callback();
+	}
+	
+	if(status & TWI_IER_ENDTX)
+	{
+		Wire.tx_ready_callback();
+	}
+}
 

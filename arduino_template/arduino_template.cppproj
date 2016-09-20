@@ -369,18 +369,18 @@
           <JtagDbgClock>7500000</JtagDbgClock>
           <SwdClock>2000000</SwdClock>
         </InterfaceProperties>
-        <InterfaceName>JTAG</InterfaceName>
+        <InterfaceName>SWD</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.atmelice</ToolType>
       <ToolNumber>J41800031017</ToolNumber>
       <ToolName>Atmel-ICE</ToolName>
     </com_atmel_avrdbg_tool_atmelice>
-    <avrtoolinterface>JTAG</avrtoolinterface>
+    <avrtoolinterface>SWD</avrtoolinterface>
     <avrtoolinterfaceclock>2000000</avrtoolinterfaceclock>
     <com_atmel_avrdbg_tool_edbg>
       <ToolOptions>
         <InterfaceProperties>
-          <SwdClock>0</SwdClock>
+          <SwdClock>2000000</SwdClock>
         </InterfaceProperties>
         <InterfaceName>SWD</InterfaceName>
       </ToolOptions>
@@ -449,13 +449,13 @@
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
             <Value>../src/ASF/sam/drivers/dacc</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcc.compiler.directories.IncludePaths>
         <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
@@ -517,13 +517,13 @@
             <Value>../src/ASF/sam/drivers/hsmci</Value>
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcccpp.compiler.directories.IncludePaths>
         <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
@@ -585,13 +585,13 @@
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
             <Value>../src/ASF/sam/drivers/dacc</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcccpp.assembler.general.IncludePaths>
         <armgcccpp.preprocessingassembler.general.AssemblerFlags>-DUDD_ENABLE</armgcccpp.preprocessingassembler.general.AssemblerFlags>
@@ -637,13 +637,13 @@
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
             <Value>../src/ASF/sam/drivers/dacc</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcccpp.preprocessingassembler.general.IncludePaths>
       </ArmGccCpp>
@@ -712,13 +712,13 @@
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
             <Value>../src/ASF/sam/drivers/dacc</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcc.compiler.directories.IncludePaths>
         <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
@@ -784,13 +784,13 @@
             <Value>../src/ASF/sam/drivers/hsmci</Value>
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcccpp.compiler.directories.IncludePaths>
         <armgcccpp.compiler.optimization.level>Optimize (-O1)</armgcccpp.compiler.optimization.level>
@@ -857,13 +857,13 @@
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
             <Value>../src/ASF/sam/drivers/dacc</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcccpp.assembler.general.IncludePaths>
         <armgcccpp.assembler.debugging.DebugLevel>Default (-g)</armgcccpp.assembler.debugging.DebugLevel>
@@ -910,13 +910,13 @@
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
             <Value>../src/ASF/sam/drivers/dacc</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcccpp.preprocessingassembler.general.IncludePaths>
         <armgcccpp.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcccpp.preprocessingassembler.debugging.DebugLevel>
@@ -988,13 +988,13 @@
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
             <Value>../src/ASF/sam/drivers/dacc</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcc.compiler.directories.IncludePaths>
         <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
@@ -1060,13 +1060,13 @@
             <Value>../src/ASF/sam/drivers/hsmci</Value>
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcccpp.compiler.directories.IncludePaths>
         <armgcccpp.compiler.optimization.level>Optimize (-O1)</armgcccpp.compiler.optimization.level>
@@ -1133,13 +1133,13 @@
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
             <Value>../src/ASF/sam/drivers/dacc</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcccpp.assembler.general.IncludePaths>
         <armgcccpp.assembler.debugging.DebugLevel>Default (-g)</armgcccpp.assembler.debugging.DebugLevel>
@@ -1186,13 +1186,13 @@
             <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
             <Value>../src/ASF/common/services/gpio</Value>
             <Value>../src/ASF/sam/drivers/dacc</Value>
-            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
             <Value>../src/ASF/sam/drivers/rstc</Value>
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/twi</Value>
             <Value>../src/ASF/common/services/twi</Value>
             <Value>../src/ASF/sam/drivers/efc</Value>
             <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>%24(PackRepoDir)\arm\cmsis\4.2.0\CMSIS\Include\</Value>
           </ListValues>
         </armgcccpp.preprocessingassembler.general.IncludePaths>
         <armgcccpp.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcccpp.preprocessingassembler.debugging.DebugLevel>
@@ -1280,6 +1280,12 @@
     <Compile Include="src\arduino_core\Printable.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\arduino_core\RealTimeClock.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\arduino_core\RealTimeClock.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\arduino_core\samduino_version.h">
       <SubType>compile</SubType>
     </Compile>
@@ -1308,12 +1314,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\arduino_core\WCharacter.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\arduino_core\Wire.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\arduino_core\Wire.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\arduino_core\wiring_private.h">

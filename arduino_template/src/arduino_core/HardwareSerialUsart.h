@@ -43,8 +43,7 @@
 
 #include "Stream.h"
 
-#define SERIAL_USART_RX_BUFFER_SIZE		1024
-#define SERIAL_USART_RX_BUFFER_SIZE		1024
+#define SERIAL_USART_RX_BUFFER_SIZE		512
 
 // Define config for Serial.begin(baud, config);
 #define SERIAL_5N1 0x00

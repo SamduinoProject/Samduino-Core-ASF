@@ -331,17 +331,18 @@ uint32_t twi_master_write(Twi *p_twi, twi_packet_t *p_packet)
 	uint32_t status;
 	uint32_t cnt = p_packet->length;
 	uint8_t *buffer = p_packet->buffer;
+	uint32_t timeout = TWI_TIMEOUT*10;
 
 	/* Check argument */
 	if (cnt == 0) {
-	//	return TWI_INVALID_ARGUMENT;
+		//	return TWI_INVALID_ARGUMENT;
 	}
 
 	/* Set write mode, slave address and 3 internal address byte lengths */
 	p_twi->TWI_MMR = 0;
 	p_twi->TWI_MMR = TWI_MMR_DADR(p_packet->chip) |
-			((p_packet->addr_length << TWI_MMR_IADRSZ_Pos) &
-			TWI_MMR_IADRSZ_Msk);
+	((p_packet->addr_length << TWI_MMR_IADRSZ_Pos) &
+	TWI_MMR_IADRSZ_Msk);
 
 	/* Set internal address for remote chip */
 	p_twi->TWI_IADR = 0;
@@ -354,6 +355,10 @@ uint32_t twi_master_write(Twi *p_twi, twi_packet_t *p_packet)
 			return TWI_RECEIVE_NACK;
 		}
 
+		if (!timeout--) {
+			return TWI_ERROR_TIMEOUT;
+		}
+
 		if (!(status & TWI_SR_TXRDY)) {
 			continue;
 		}
@@ -361,7 +366,9 @@ uint32_t twi_master_write(Twi *p_twi, twi_packet_t *p_packet)
 
 		cnt--;
 	}
-
+	
+	timeout = TWI_TIMEOUT;
+	
 	while (1) {
 		status = p_twi->TWI_SR;
 		if (status & TWI_SR_NACK) {
@@ -370,6 +377,10 @@ uint32_t twi_master_write(Twi *p_twi, twi_packet_t *p_packet)
 
 		if (status & TWI_SR_TXRDY) {
 			break;
+		}
+		
+		if (!timeout--) {
+			return TWI_ERROR_TIMEOUT;
 		}
 	}
 

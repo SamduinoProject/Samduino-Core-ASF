@@ -65,8 +65,8 @@
 #    define UDI_CDC_TX_BUFFERS     (UDI_CDC_DATA_EPS_HS_SIZE)
 #    define UDI_CDC_RX_BUFFERS     (UDI_CDC_DATA_EPS_HS_SIZE)
 #  else
-#    define UDI_CDC_TX_BUFFERS     (5*UDI_CDC_DATA_EPS_FS_SIZE)
-#    define UDI_CDC_RX_BUFFERS     (5*UDI_CDC_DATA_EPS_FS_SIZE)
+#    define UDI_CDC_TX_BUFFERS     (20*UDI_CDC_DATA_EPS_FS_SIZE)
+#    define UDI_CDC_RX_BUFFERS     (20*UDI_CDC_DATA_EPS_FS_SIZE)
 #  endif
 #endif
 

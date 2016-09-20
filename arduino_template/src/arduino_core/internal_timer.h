@@ -26,7 +26,7 @@ void internal_timer_configure(uint32_t hertz);
 void start_microseconds_counter(void);
 
 void delay(uint32_t ms_delay);
-unsigned long millis(void);
+uint64_t millis(void);
 
 #ifdef __cplusplus
 }

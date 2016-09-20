@@ -29,6 +29,8 @@
 
 #define BUFFER_LENGTH 32
 
+#define TWI_BUFFER_SIZE 128
+
 // WIRE_HAS_END means Wire has end()
 #define WIRE_HAS_END 1
 
@@ -47,7 +49,7 @@ class TwoWire : public Stream
     uint8_t endTransmission(uint8_t);
     uint8_t requestFrom(uint8_t, uint8_t);
     uint8_t requestFrom(uint8_t, uint8_t, uint8_t);
-	uint8_t requestFrom(uint8_t, uint8_t, uint32_t, uint8_t, uint8_t);
+	uint8_t requestFrom(uint8_t address, uint8_t quantity, uint32_t iaddress, uint8_t isize, uint8_t sendStop);
     uint8_t requestFrom(int, int);
     uint8_t requestFrom(int, int, int);
     virtual size_t write(uint8_t);
@@ -64,6 +66,10 @@ class TwoWire : public Stream
     inline size_t write(unsigned int n) { return write((uint8_t)n); }
     inline size_t write(int n) { return write((uint8_t)n); }
     using Print::write;
+	
+	//isr callbacks for buffer handling
+	void tx_ready_callback(void);
+	void rx_ready_callback(void);
 	
 private:
 	Twi* twiPeripheral;
@@ -92,18 +98,67 @@ private:
 	void (*twi_onSlaveTransmit)(void);
 	void (*twi_onSlaveReceive)(uint8_t*, int);
 
-	uint8_t twi_masterBuffer[BUFFER_LENGTH];
-	volatile uint8_t twi_masterBufferIndex;
-	volatile uint8_t twi_masterBufferLength;
+	/** \brief The rx buffer **/
+		uint8_t rx_buffer[TWI_BUFFER_SIZE];
+		
+		/** \brief Pointer to the end of the rx buffer **/
+		uint8_t* rx_buffer_end;
+		
+		/** \brief Pointer to the head of the data in the rx buffer
+		The head is where the next read will come from **/
+		volatile uint8_t* rx_buffer_head;
+		
+		/** \brief Pointer to the tail of the data in the rx buffer
+		The tail is where the next write will place its data **/
+		uint8_t* rx_buffer_tail;
+		
+		/** \brief The number of bytes in the rx buffer **/
+		volatile uint8_t rx_buffer_size;
+		
+		/********************************************//**
+		\brief Append a byte to the rx buffer.
+		@param[in]	data	the data to be appended to the rx buffer
+		@return				the number of bytes written
+		***********************************************/
+		uint8_t rx_buffer_append(uint8_t data);
+		
+		/********************************************//**
+		\brief Remove a byte from the rx buffer.
+		@param[in]	data	pointer to fill with data from the rx buffer
+		@return				the number of bytes written
+		***********************************************/
+		uint8_t rx_buffer_remove(uint8_t* data);
 
-	uint8_t twi_txBuffer[BUFFER_LENGTH];
-	volatile uint8_t twi_txBufferIndex;
-	volatile uint8_t twi_txBufferLength;
-
-	uint8_t twi_rxBuffer[BUFFER_LENGTH];
-	volatile uint8_t twi_rxBufferIndex;
-
-	volatile uint8_t twi_error;
+		/** \brief The tx buffer **/
+		uint8_t tx_buffer[TWI_BUFFER_SIZE];
+		
+		/** \brief Pointer to the end of the tx buffer **/
+		uint8_t* tx_buffer_end;
+		
+		/** \brief Pointer to the head of the data in the rx buffer
+		The head is where the next read will come from **/
+		volatile uint8_t* tx_buffer_head;
+		
+		/** \brief Pointer to the tail of the data in the rx buffer
+		The tail is where the next write will place its data **/
+		volatile uint8_t* tx_buffer_tail;
+		
+		/** \brief Holds the number of bytes in the tx buffer **/
+		volatile uint8_t tx_buffer_size;
+	
+		/********************************************//**
+		\brief Append a byte to the tx buffer.
+		@param[in]	data	the data to be appended to the tx buffer
+		@return				the number of bytes written
+		***********************************************/
+		uint8_t tx_buffer_append(uint8_t data);
+		
+		/********************************************//**
+		\brief Append a byte to the tx buffer.
+		@param[in]	data	pointer to fill with data from the tx buffer
+		@return				the number of bytes written
+		***********************************************/
+		uint8_t tx_buffer_remove(uint8_t* data);
 	
 };
 

@@ -29,7 +29,7 @@ extern "C" void usb_serial_tx_empty_notify(uint8_t port);
 /********************************************//**
 \brief Size in bytes of the USB Serial RX buffer
 ***********************************************/
-#define USB_SERIAL_BUFFER_SIZE			1024
+#define USB_SERIAL_BUFFER_SIZE			512
 
 /********************************************//**
 \brief Class to encapsulate the USB Serial device

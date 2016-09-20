@@ -76,7 +76,7 @@ void board_init(void)
 	//dacc_enable_channel(DACC, 1);
 	dacc_set_analog_control(DACC, DACC_ANALOG_CONTROL);
 	
-	//start the usb stack regardless
+	//start the usb stack regardless so that resets over dtr are detected
 	udc_start();
 	
 }

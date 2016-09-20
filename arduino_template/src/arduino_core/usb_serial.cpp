@@ -37,12 +37,15 @@ usb_serial::operator bool()
 
 void usb_serial::begin(unsigned long baud)
 {
-	stdio_usb_init();
+	//udc_stop();
+	//udc_start();
+	//stdio_usb_init();
 }
 
 void usb_serial::end(void)
 {
-	stdio_usb_disable();
+	//stdio_usb_disable();
+	udc_stop();
 }
 
 int usb_serial::available(void)
@@ -61,7 +64,14 @@ int usb_serial::read(void)
 	}
 	else
 	{
-		return -1;
+		if(udi_cdc_is_rx_ready())
+		{
+			return udi_cdc_getc();
+		}
+		else
+		{
+			return -1;
+		}
 	}
 }
 
@@ -77,40 +87,56 @@ void usb_serial::flush(void)
 
 size_t usb_serial::write(uint8_t data)
 {
-	//while(udi_cdc_is_tx_ready() == 0); //wait for tx to be ready to send
+	//current code
+	/*
 	if(udi_cdc_is_tx_ready())
 	{
 		return udi_cdc_putc(data & 0xff);
 	}
-	else
-	{
-		return 0;
-	}
-	/*
+	return 0;
+	*/
+	
+	
+	
+	//else
+	//{
+	//	udi_cdc_signal_overrun();
+	//	return 0;	
+	//}
+	//}
+	//else
+	//{
+	//	return 0;
+	//}
+	
 	//cpu_irq_disable();
-	//int temp_tx_buf_size = tx_buffer_size;
+	int temp_tx_buf_size = tx_buffer_size;
 	//cpu_irq_enable();
-	if(!transmitting)
+	if(temp_tx_buf_size == 0)//!transmitting)
 	{
-		transmitting = true;
+		//transmitting = true;
 		udi_cdc_putc(data);
 		return 1;
 	}
 	else
 	{
+		transmitting = true;
 		return tx_buffer_append(data);
 	}
-	*/
+	
 }
 
 size_t usb_serial::write(const uint8_t* buffer, size_t bufferLength)
 {
-	/*
-	if(udi_cdc_get_free_tx_buffer() < bufferLength)
+	
+	//cpu_irq_disable();
+	int temp_tx_buf_size = tx_buffer_size;
+	//cpu_irq_enable();
+	if(USB_SERIAL_BUFFER_SIZE - temp_tx_buf_size < bufferLength)
 	{
 		return 0;
 	}
-	*/
+	
 	
 	int bytesSent = 0;
 	for(size_t i = 0; i < bufferLength; i++)
@@ -245,16 +271,29 @@ void usb_serial::rx_callback(void)
 {
 	//need to loop here because back to back RX may not generate multiple rx calls
 	//so loop to eat all data for each call to ensure we catch all data
+	
 	uint8_t res = 1;
-	while(udi_cdc_is_rx_ready() && res)
+	uint16_t counter = 0;
+	while(udi_cdc_is_rx_ready() && rx_buffer_size < USB_SERIAL_BUFFER_SIZE && counter < 32)
 	{
+		//Serial2.write(udi_cdc_getc());
 		res = rx_buffer_enqueue(udi_cdc_getc());
 	}
+	
+	/*
+	uint8_t tempBuf[256];
+	uint16_t avail = udi_cdc_get_nb_received_data();
+	uint16_t rcvCount = udi_cdc_read_buf(tempBuf, 256);
+	for(int i = 0; i < rcvCount; i++)
+	{
+		rx_buffer_enqueue(tempBuf[i]);
+	}
+	*/
 }
 
 void usb_serial_rx_notify(uint8_t port)
 {
-	if(port == 0)
+	//if(port == 0)
 	{
 		Serial.rx_callback();
 	}
@@ -265,18 +304,12 @@ void usb_serial::tx_empty_callback()
 	uint8_t data;
 	
 	uint8_t res = tx_buffer_remove(&data);
-	/*
+	
 	if(res)
 	{
 		udi_cdc_putc(data);
 	}
-	*/
-	while(res && udi_cdc_is_tx_ready())
-	{
-		udi_cdc_putc(data);
-		res = tx_buffer_remove(&data);
-	}
-	if(res == 0)
+	else
 	{
 		transmitting = false;
 	}
@@ -284,5 +317,5 @@ void usb_serial::tx_empty_callback()
 
 void usb_serial_tx_empty_notify(uint8_t port)
 {
-	//Serial.tx_empty_callback();
+	Serial.tx_empty_callback();
 }
